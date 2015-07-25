@@ -3,6 +3,7 @@
 #include "CustomVertexFormats.h"
 #include "KeyCodes.h"
 #include "Cube.h"
+#include "Timer.h"
 #include <vector>
 #include <iostream>
 
@@ -12,23 +13,20 @@ IDirect3DVertexBuffer9* VBO = NULL;
 IDirect3DIndexBuffer9* IBO = NULL;
 D3DPRIMITIVETYPE primitiveType = D3DPT_POINTLIST;
 UINT primitiveCount = 6;
+Timer timer;
 std::vector<Cube> cubeList;
-long last = 0;
-float deltaTime;
 
 void cleanup();
 void quitWithError(LPCTSTR error);
 void programLoop();
 void prepareForDrawing();
 void render();
-void update(const float &dt);
+void update();
 void initializeResources();
 void initializeMatrices();
 void releaseResources();
 void initialize();
 void getSupportedVindowResolutions();
-void setDT(float &dt);
-
 
 LRESULT CALLBACK messageHandler(HWND window, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -91,16 +89,16 @@ void programLoop()
 		}
 		else
 		{
-			setDT(deltaTime);
-			update(deltaTime);
+			update();
 			prepareForDrawing();
 		}
 	}
 }
 
-void update(const float &dt)
+void update()
 {
-	
+	timer.update();
+	std::cout << timer.getFramesPerSecond() << std::endl;
 }
 
 void prepareForDrawing()
@@ -334,9 +332,4 @@ void getSupportedVindowResolutions()
 			tempWidth = dm.dmPelsWidth; tempHeight = dm.dmPelsHeight;
 		}
 	}
-}
-
-void setDT(float &dt)
-{
-
 }
