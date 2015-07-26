@@ -1,4 +1,6 @@
 #include "Cube.h"
+#define DEG2RAD(x) (x * (D3DX_PI / 180.0f)) // Converts degrees to radians
+#define RAD2DEG(x) (x * (180.0f / D3DX_PI)) // Converts radians to degrees
 
 Cube::Cube(float length, float height, float width, int x, int y, int z, float rotationX, float rotationY, bool render)
 {
@@ -31,4 +33,10 @@ void Cube::render(D3DManager *d3dManager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, 
 		for (int i = 0; i < 6; i++)
 			d3dManager->getDevice().DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, 8, i * 4, 2);
 	}
+}
+
+void Cube::update()
+{
+	m_rotationX += DEG2RAD(1);
+	m_rotationY += DEG2RAD(2);
 }

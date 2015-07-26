@@ -98,7 +98,7 @@ void programLoop()
 void update()
 {
 	timer.update();
-	std::cout << timer.getFramesPerSecond() << std::endl;
+	cubeList[0].update();
 }
 
 void prepareForDrawing()
