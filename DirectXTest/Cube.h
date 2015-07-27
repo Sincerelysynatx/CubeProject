@@ -8,6 +8,7 @@
 class Cube
 {
 public:
+	Cube();
 	Cube(float length, float height, float width, int x, int y, int z, float rotationX, float rotationY, bool render);
 	Cube(int x, int y, int z, bool render);
 	~Cube();

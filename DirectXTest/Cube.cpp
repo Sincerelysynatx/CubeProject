@@ -2,6 +2,11 @@
 #define DEG2RAD(x) (x * (D3DX_PI / 180.0f)) // Converts degrees to radians
 #define RAD2DEG(x) (x * (180.0f / D3DX_PI)) // Converts radians to degrees
 
+Cube::Cube()
+{
+
+}
+
 Cube::Cube(float length, float height, float width, int x, int y, int z, float rotationX, float rotationY, bool render)
 {
 

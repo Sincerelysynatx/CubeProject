@@ -11,10 +11,7 @@ Window* window;
 D3DManager* d3dManager;
 IDirect3DVertexBuffer9* VBO = NULL;
 IDirect3DIndexBuffer9* IBO = NULL;
-D3DPRIMITIVETYPE primitiveType = D3DPT_POINTLIST;
-UINT primitiveCount = 6;
-Timer timer;
-std::vector<Cube> cubeList;
+Timer *timer;
 
 void cleanup();
 void quitWithError(LPCTSTR error);
@@ -50,27 +47,6 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-void cleanup() 
-{
-	if (window != NULL) { delete window; window = NULL; }
-	if (d3dManager != NULL) { delete d3dManager; d3dManager = NULL; }
-	releaseResources();
-}
-
-void quitWithError(LPCTSTR error) 
-{
-	// We'll use MessageBox to show the error to the screen.
-	HWND parentWindow = NULL;
-	if (window != NULL) parentWindow = window->getHandle();
-	MessageBox(parentWindow, error, TEXT("Runtime Error!"), MB_OK | MB_ICONERROR);
-	// Even though we're quitting on a failure, that's no reason to avoid cleaning up after
-	// ourselves.
-	cleanup();
-
-	// Finally, force an exit with the Failure exit code.
-	exit(EXIT_FAILURE);
-}
-
 // -------------------------------------------------
 /* programLoop */
 // This is what the program will do in idle time.
@@ -97,8 +73,7 @@ void programLoop()
 
 void update()
 {
-	timer.update();
-	cubeList[0].update();
+	timer->update();
 }
 
 void prepareForDrawing()
@@ -138,7 +113,7 @@ void render()
 	*/
 	D3DXMATRIXA16 baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix;
 	d3dManager->getDevice().GetTransform(D3DTS_WORLD, &baseMatrix);
-	cubeList[0].render(d3dManager, baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix);
+	//render cube here
 	d3dManager->getDevice().SetTransform(D3DTS_WORLD, &baseMatrix);
 
 }
@@ -287,9 +262,8 @@ void initialize()
 	initializeMatrices();
 	initializeResources();
 	float pointSize = 5.0f;
+	timer = new Timer;
 	d3dManager->getDevice().SetRenderState(D3DRS_POINTSIZE, *((DWORD*)&pointSize));
-	Cube tempCube(0, 0, 0, true);
-	cubeList.push_back(tempCube);
 }
 
 // -------------------------------------------------
@@ -309,12 +283,6 @@ void initializeMatrices() {
 	d3dManager->getDevice().SetRenderState(D3DRS_LIGHTING, false);
 }
 
-void releaseResources()
-{
-	if (VBO != NULL) { VBO->Release(); VBO = NULL; }
-	if (IBO != NULL) { IBO->Release(); IBO = NULL; }
-}
-
 void getSupportedVindowResolutions()
 {
 	DEVMODE dm = { 0 };
@@ -332,4 +300,33 @@ void getSupportedVindowResolutions()
 			tempWidth = dm.dmPelsWidth; tempHeight = dm.dmPelsHeight;
 		}
 	}
+}
+
+void quitWithError(LPCTSTR error)
+{
+	// We'll use MessageBox to show the error to the screen.
+	HWND parentWindow = NULL;
+	if (window != NULL) parentWindow = window->getHandle();
+	MessageBox(parentWindow, error, TEXT("Runtime Error!"), MB_OK | MB_ICONERROR);
+	// Even though we're quitting on a failure, that's no reason to avoid cleaning up after
+	// ourselves.
+	cleanup();
+
+	// Finally, force an exit with the Failure exit code.
+	exit(EXIT_FAILURE);
+}
+
+void cleanup()
+{
+	if (window != NULL) { delete window; window = NULL; }
+	if (d3dManager != NULL) { delete d3dManager; d3dManager = NULL; }
+	delete timer;
+	releaseResources();
+}
+
+
+void releaseResources()
+{
+	if (VBO != NULL) { VBO->Release(); VBO = NULL; }
+	if (IBO != NULL) { IBO->Release(); IBO = NULL; }
 }

@@ -7,13 +7,18 @@ public:
 	Timer();
 	~Timer();
 	void update();
+	void calculateFramesPerSecond();
+	void calculateDeltaTime();
 	int getFramesPerSecond();
-	long getDeltaTime();
+	float getDeltaTime();
 private:
 	int m_framesThisSecond;
 	int m_framesPerSecond;
-	unsigned int m_oldTime;
-	unsigned int m_newTime;
+	unsigned int m_oldTimeFPS;
+	unsigned int m_oldTimeDT;
+	unsigned int m_newTimeFPS;
+	unsigned int m_newTimeDT;
+	float m_delta;
 };
 
 
