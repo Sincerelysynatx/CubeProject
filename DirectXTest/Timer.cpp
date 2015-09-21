@@ -11,6 +11,7 @@ Timer::Timer()
 	m_newTimeFPS = 0;
 	m_oldTimeDT = 0;
 	m_newTimeDT = 0;
+	m_multipleTickMultiplier = 0;
 }
 
 Timer::~Timer()
@@ -41,8 +42,13 @@ void Timer::calculateDeltaTime()
 	m_newTimeDT = timeGetTime();
 	if (m_newTimeDT > m_oldTimeDT)
 	{
-		m_delta = (float) (m_newTimeDT - m_oldTimeDT) / 16;
+		m_delta = (float)(m_newTimeDT - m_oldTimeDT) / (16 * m_multipleTickMultiplier);
 		m_oldTimeDT = m_newTimeDT;
+		m_multipleTickMultiplier = 0;
+	}
+	else
+	{
+		m_multipleTickMultiplier++;
 	}
 }
 

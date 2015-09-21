@@ -1,6 +1,7 @@
 #include "Cube.h"
 #define DEG2RAD(x) (x * (D3DX_PI / 180.0f)) // Converts degrees to radians
 #define RAD2DEG(x) (x * (180.0f / D3DX_PI)) // Converts radians to degrees
+#define XRGB(r, g, b) D3DCOLOR_XRGB(r, g, b)
 
 Cube::Cube()
 {
@@ -40,7 +41,7 @@ void Cube::render(D3DManager *d3dManager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, 
 	}
 }
 
-void Cube::update()
+void Cube::update(const float dt)
 {
 	m_rotationX += DEG2RAD(1);
 	m_rotationY += DEG2RAD(2);

@@ -13,7 +13,7 @@ public:
 	Cube(int x, int y, int z, bool render);
 	~Cube();
 	void render(D3DManager *d3dmanager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, D3DXMATRIXA16 &rM1, D3DXMATRIXA16 &rM2, D3DXMATRIXA16 &tM);
-	void update();
+	void update(const float dt);
 
 private:
 	float m_length;

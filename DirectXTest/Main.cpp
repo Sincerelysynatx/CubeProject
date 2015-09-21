@@ -12,6 +12,8 @@ D3DManager* d3dManager;
 IDirect3DVertexBuffer9* VBO = NULL;
 IDirect3DIndexBuffer9* IBO = NULL;
 Timer *timer;
+Cube *cube = new Cube(0, 0, 0, true);
+float deltaTime = 0;
 
 void cleanup();
 void quitWithError(LPCTSTR error);
@@ -47,10 +49,6 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-// -------------------------------------------------
-/* programLoop */
-// This is what the program will do in idle time.
-// -------------------------------------------------
 void programLoop() 
 {
 	MSG msg;
@@ -74,6 +72,8 @@ void programLoop()
 void update()
 {
 	timer->update();
+	deltaTime = timer->getDeltaTime();
+	cube->update(deltaTime);
 }
 
 void prepareForDrawing()
@@ -99,29 +99,13 @@ void prepareForDrawing()
 
 void render()
 {
-	/*
-	xRotation += D3DX_PI / 180.0f;
-	yRotation += D3DX_PI / 90.0f;
-	D3DXMATRIXA16 xRotationMatrix, yRotationMatrix, worldMatrix, translateMatrix;
-	D3DXMatrixRotationX(&xRotationMatrix, xRotation);
-	D3DXMatrixRotationY(&yRotationMatrix, yRotation);
-	D3DXMatrixTranslation(&translateMatrix, 0.0f, 0.0f, 0.0f);
-	worldMatrix = yRotationMatrix * xRotationMatrix * translateMatrix;
-	d3dManager->getDevice().SetTransform(D3DTS_WORLD, &worldMatrix);
-	for (int i = 0; i < 6; i++)
-		d3dManager->getDevice().DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, 8, i * 4, 2);
-	*/
-	D3DXMATRIXA16 baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix;
+	static D3DXMATRIXA16 baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix;
 	d3dManager->getDevice().GetTransform(D3DTS_WORLD, &baseMatrix);
-	//render cube here
+	cube->render(d3dManager, baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix);
 	d3dManager->getDevice().SetTransform(D3DTS_WORLD, &baseMatrix);
 
 }
 
-//-----------------------------------------------------------------------------
-/* messageHandler */
-// This will manage incoming messages from the window.
-//-----------------------------------------------------------------------------
 LRESULT CALLBACK messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 {
 	switch (msg) 
@@ -173,14 +157,14 @@ void initializeResources()
 {
 	Vertex_UD vertices[] = {
 		{ -1.0f, 1.0f, -1.0f, 0xff00ff00 },
-		{ 1.0f, 1.0f, -1.0f, 0xff7fff00 },
-		{ -1.0f, -1.0f, -1.0f, 0xff00ff7f },
-		{ 1.0f, -1.0f, -1.0f, 0xff7fff7f },
+		{ 1.0f, 1.0f, -1.0f, 0xff00ff00 },
+		{ -1.0f, -1.0f, -1.0f, 0xff00ff00 },
+		{ 1.0f, -1.0f, -1.0f, 0xff00ff00 },
 
-		{ -1.0f, 1.0f, 1.0f, 0xff0000ff },
-		{ 1.0f, 1.0f, 1.0f, 0xff7f00ff },
-		{ -1.0f, -1.0f, 1.0f, 0xff007fff },
-		{ 1.0f, -1.0f, 1.0f, 0xff7f7fff }
+		{ -1.0f, 1.0f, 1.0f, 0xff00ff00 },
+		{ 1.0f, 1.0f, 1.0f, 0xff00ff00 },
+		{ -1.0f, -1.0f, 1.0f, 0xff00ff00 },
+		{ 1.0f, -1.0f, 1.0f, 0xff00ff00 }
 	};
 
 	// With our vertices created, we can make our triangle buffer now.
@@ -261,7 +245,7 @@ void initialize()
 {
 	initializeMatrices();
 	initializeResources();
-	float pointSize = 5.0f;
+	float pointSize = 0.0f;
 	timer = new Timer;
 	d3dManager->getDevice().SetRenderState(D3DRS_POINTSIZE, *((DWORD*)&pointSize));
 }
@@ -323,7 +307,6 @@ void cleanup()
 	delete timer;
 	releaseResources();
 }
-
 
 void releaseResources()
 {

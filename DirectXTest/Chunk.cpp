@@ -25,3 +25,8 @@ Chunk::~Chunk()
 	}
 	delete[] m_cubes;
 }
+
+void Chunk::update(const float &dt)
+{
+
+}
