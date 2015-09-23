@@ -3,6 +3,7 @@
 
 #include <d3d9.h>
 #include <d3dx9.h> // *NEW* - For much easier control over Matrices.
+#include "Camera.h"
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib") // *NEW* - For much easier control over Matrices.
 
@@ -31,6 +32,7 @@ public:
 	{ 
 		setViewMatrix(vector[0], vector[1], vector[2]); 
 	}
+	void setViewMatrix(const Camera *camera);
 	void setProjectionMatrix(float fov, float aspectRatio, float zClose, float zFar);
 	void setProjectionMatrix(float fov, float zClose, float zFar) 
 	{

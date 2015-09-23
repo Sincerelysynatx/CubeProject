@@ -43,8 +43,8 @@ D3DManager::D3DManager(HWND window, int width, int height, bool fullscreen)
 	parameters.FullScreen_RefreshRateInHz = 0;
 
 	// UINT PresentationInterval - How often to redraw the screen.
-	//parameters.PresentationInterval = (fullscreen)? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_ONE;
-	parameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	parameters.PresentationInterval = (fullscreen)? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_ONE;
+	//parameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
 	if (fullscreen) while (ShowCursor(false) >= 0);
 	else while (ShowCursor(true) < 0);
@@ -108,6 +108,14 @@ void D3DManager::errorCheck(HRESULT result, LPCTSTR debugInfo) {
 void D3DManager::setViewMatrix(const D3DXVECTOR3& eye, const D3DXVECTOR3& lookAt, const D3DXVECTOR3& up) {
 	D3DXMATRIXA16 viewMatrix;
 	D3DXMatrixLookAtLH(&viewMatrix, &eye, &lookAt, &up);
+	// Then it's the simple matter of making that the view matrix.
+	device->SetTransform(D3DTS_VIEW, &viewMatrix);
+}
+
+void D3DManager::setViewMatrix(const Camera *camera) {
+	D3DXMATRIXA16 viewMatrix;
+	D3DXVECTOR3 up(0.0f, 1.0f, 0.0f); // World's up vector
+	D3DXMatrixLookAtLH(&viewMatrix, (D3DXVECTOR3*)(&camera->getEye()), (D3DXVECTOR3*)(&camera->getTarget()), &up);
 	// Then it's the simple matter of making that the view matrix.
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 }

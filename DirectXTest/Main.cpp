@@ -4,8 +4,13 @@
 #include "KeyCodes.h"
 #include "Cube.h"
 #include "Timer.h"
+#include "Camera.h"
+#include "Vector.h"
 #include <vector>
 #include <iostream>
+
+#define DEG2RAD(x) (x * (D3DX_PI / 180.0f)) // Converts degrees to radians
+#define RAD2DEG(x) (x * (180.0f / D3DX_PI)) // Converts radians to degrees
 
 Window* window;
 D3DManager* d3dManager;
@@ -13,7 +18,10 @@ IDirect3DVertexBuffer9* VBO = NULL;
 IDirect3DIndexBuffer9* IBO = NULL;
 Timer *timer;
 Cube *cube = new Cube(0, 0, 0, true);
+CPos gCubePos(0, 0, 0); // Position of cube in the world
 float deltaTime = 0;
+float moveAmt = 0;
+
 
 void cleanup();
 void quitWithError(LPCTSTR error);
@@ -21,6 +29,7 @@ void programLoop();
 void prepareForDrawing();
 void render();
 void update();
+void CameraMouseInput();
 void initializeResources();
 void initializeMatrices();
 void releaseResources();
@@ -71,7 +80,14 @@ void programLoop()
 
 void update()
 {
+	//update timer
 	timer->update();
+	//set movement amount
+	moveAmt = 10.0f * timer->getDeltaTime();
+	//get mouse input for the camera
+	CameraMouseInput();
+	//
+	//d3dManager->setViewMatrix(gCamera);
 	deltaTime = timer->getDeltaTime();
 	cube->update(deltaTime);
 }
@@ -106,6 +122,49 @@ void render()
 
 }
 
+void CameraMouseInput()
+{
+	const float kMaxAngle = 89.0f;
+	static float pitchAmt = 0.0f; // Amout we've looked up or down
+
+								  // Get the middle of the screen
+	int midScrX = GetSystemMetrics(SM_CXSCREEN) >> 1;
+	int midScrY = GetSystemMetrics(SM_CYSCREEN) >> 1;
+
+	float amt;
+	POINT pt = { 0 };
+
+	GetCursorPos(&pt); // Get the current mouse position
+
+					   // Rotate left/right
+	amt = float(pt.x - midScrX) * moveAmt;
+	gCamera->rotateY(DEG2RAD(amt), gCubePos);
+
+	// Rotate up/down
+	amt = float(midScrY - pt.y) * moveAmt;
+
+	// Cap pitch
+	if (pitchAmt + amt < -kMaxAngle)
+	{
+		amt = -kMaxAngle - pitchAmt;
+		pitchAmt = -kMaxAngle;
+	}
+	else if (pitchAmt + amt > kMaxAngle)
+	{
+		amt = kMaxAngle - pitchAmt;
+		pitchAmt = kMaxAngle;
+	}
+	else
+	{
+		pitchAmt += amt;
+	}
+
+	// Pitch the camera up/down
+	gCamera->pitch(DEG2RAD(amt), gCubePos);
+
+	SetCursorPos(midScrX, midScrY); // Set our cursor back to the middle of the screen
+}
+
 LRESULT CALLBACK messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 {
 	switch (msg) 
@@ -115,6 +174,8 @@ LRESULT CALLBACK messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 			return 0;
 		
 		case WM_KEYDOWN:
+			CVector vec; // Used to hold camera's forward vector
+			CPos eye; // Used to hold camera's eye
 			switch (wParam)
 			{
 				case VK_F11:
@@ -147,6 +208,61 @@ LRESULT CALLBACK messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 				case VK_V:
 					d3dManager->toggleFillMode();
 					return 0;
+				case 'W':
+				case VK_UP: // If they push up, move forward (Camera's +Z)
+					vec = gCamera->getCamForward();
+					eye = gCamera->getEye();
+
+					// Move the camera's eye and cube in the direction of
+					// the camera's forward vector
+					eye += vec * moveAmt;
+					gCubePos += vec * moveAmt;
+
+					gCamera->setEye(eye);
+					gCamera->setTarget(gCubePos); // Set the camera to look at the cube
+					break;
+
+				case 'S':
+				case VK_DOWN: // If they push down, move backward (Camera's -Z)
+					vec = gCamera->getCamForward();
+					eye = gCamera->getEye();
+
+					// Move the camera's eye and cube opposite the direction of
+					// the camera's forward vector
+					eye -= vec * moveAmt;
+					gCubePos -= vec * moveAmt;
+
+					gCamera->setEye(eye);
+					gCamera->setTarget(gCubePos); // Set the camera to look at the cube
+					break;
+
+				case 'D':
+				case VK_RIGHT: // If they push right, move right (Camera's +X)
+					vec = gCamera->getCamRight();
+					eye = gCamera->getEye();
+
+					// Move the camera's eye and cube in the direction of
+					// the camera's right vector (strafe right)
+					eye += vec * moveAmt;
+					gCubePos += vec * moveAmt;
+
+					gCamera->setEye(eye);
+					gCamera->setTarget(gCubePos); // Set the camera to look at the cube
+					break;
+
+				case 'A':
+				case VK_LEFT: // If they push left, move left (Camera's -X)
+					vec = gCamera->getCamRight();
+					eye = gCamera->getEye();
+
+					// Move the camera's eye and cube opposite the direction of
+					// the camera's right vector (strafe left)
+					eye -= vec * moveAmt;
+					gCubePos -= vec * moveAmt;
+
+					gCamera->setEye(eye);
+					gCamera->setTarget(gCubePos); // Set the camera to look at the cube
+					break;
 			}
 	}
 	// If we don't catch it, let the default message handler get it. That's this function.
@@ -157,14 +273,14 @@ void initializeResources()
 {
 	Vertex_UD vertices[] = {
 		{ -1.0f, 1.0f, -1.0f, 0xff00ff00 },
-		{ 1.0f, 1.0f, -1.0f, 0xff00ff00 },
-		{ -1.0f, -1.0f, -1.0f, 0xff00ff00 },
-		{ 1.0f, -1.0f, -1.0f, 0xff00ff00 },
+		{ 1.0f, 1.0f, -1.0f, 0xff0000ff },
+		{ -1.0f, -1.0f, -1.0f, 0x00ffff00 },
+		{ 1.0f, -1.0f, -1.0f, 0x0000ffff },
 
 		{ -1.0f, 1.0f, 1.0f, 0xff00ff00 },
-		{ 1.0f, 1.0f, 1.0f, 0xff00ff00 },
-		{ -1.0f, -1.0f, 1.0f, 0xff00ff00 },
-		{ 1.0f, -1.0f, 1.0f, 0xff00ff00 }
+		{ 1.0f, 1.0f, 1.0f, 0xff0000ff },
+		{ -1.0f, -1.0f, 1.0f, 0x00ffff00 },
+		{ 1.0f, -1.0f, 1.0f, 0x0000ffff }
 	};
 
 	// With our vertices created, we can make our triangle buffer now.
