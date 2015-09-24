@@ -17,7 +17,7 @@ D3DManager* d3dManager;
 IDirect3DVertexBuffer9* VBO = NULL;
 IDirect3DIndexBuffer9* IBO = NULL;
 Timer *timer;
-Cube *cube = new Cube(0, 0, 0, true);
+std::vector<Cube*> cubes;
 //CPos gCubePos(0, 0, 0); // Position of cube in the world
 D3DXVECTOR3 viewVectors[3] = {
 	D3DXVECTOR3(0.0f, 0.0f, -3.5f),
@@ -91,7 +91,10 @@ void update()
 	//CameraMouseInput();
 	//d3dManager->setViewMatrix(gCamera);
 	deltaTime = timer->getDeltaTime();
-	cube->update(deltaTime);
+	for (auto cube : cubes)
+	{
+		cube->update(deltaTime);
+	}
 }
 
 void prepareForDrawing()
@@ -119,7 +122,10 @@ void render()
 {
 	static D3DXMATRIXA16 baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix;
 	d3dManager->getDevice().GetTransform(D3DTS_WORLD, &baseMatrix);
-	cube->render(d3dManager, baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix);
+	for (auto cube : cubes)
+	{
+		cube->render(d3dManager, baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix);
+	}
 	d3dManager->getDevice().SetTransform(D3DTS_WORLD, &baseMatrix);
 
 }
@@ -334,6 +340,16 @@ void initialize()
 	initializeResources();
 	float pointSize = 0.0f;
 	timer = new Timer;
+	for (int z = 0; z < 5; z++)
+	{
+		for (int y = 0; y < 5; y++)
+		{
+			for (int x = 0; x < 5; x++)
+			{
+				cubes.push_back(new Cube(x, y, z, true));
+			}
+		}
+	}
 	d3dManager->getDevice().SetRenderState(D3DRS_POINTSIZE, *((DWORD*)&pointSize));
 }
 
