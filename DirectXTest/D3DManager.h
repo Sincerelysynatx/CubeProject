@@ -32,7 +32,6 @@ public:
 	{ 
 		setViewMatrix(vector[0], vector[1], vector[2]); 
 	}
-	void setViewMatrix(const Camera *camera);
 	void setProjectionMatrix(float fov, float aspectRatio, float zClose, float zFar);
 	void setProjectionMatrix(float fov, float zClose, float zFar) 
 	{
@@ -44,6 +43,7 @@ public:
 	void setProjectionMatrix() {
 		setProjectionMatrix(D3DX_PI / 4.0f, parameters.BackBufferWidth / (float)parameters.BackBufferHeight, 0.5f, 100.0f);
 	}
+	D3DXVECTOR3 getLookVector();
 
 	bool isFullScreen() { return !parameters.Windowed; }
 	void changeViewMode(int width, int height, bool fullscreen);

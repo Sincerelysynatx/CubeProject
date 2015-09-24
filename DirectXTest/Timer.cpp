@@ -42,7 +42,7 @@ void Timer::calculateDeltaTime()
 	m_newTimeDT = timeGetTime();
 	if (m_newTimeDT > m_oldTimeDT)
 	{
-		m_delta = (float)(m_newTimeDT - m_oldTimeDT) / (16 * m_multipleTickMultiplier);
+		m_delta = (float)(m_newTimeDT - m_oldTimeDT) / 16;
 		m_oldTimeDT = m_newTimeDT;
 		m_multipleTickMultiplier = 0;
 	}

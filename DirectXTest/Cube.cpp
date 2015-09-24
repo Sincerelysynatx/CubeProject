@@ -34,7 +34,7 @@ void Cube::render(D3DManager *d3dManager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, 
 	{
 		wM = bM * *D3DXMatrixRotationX(&rM2, m_rotationX) *
 			*D3DXMatrixRotationY(&rM1, m_rotationY) *
-			*D3DXMatrixTranslation(&tM, m_x * 2, m_y * 2, m_z * 2);
+			*D3DXMatrixTranslation(&tM, m_x * 2.0f, m_y * 2.0f, m_z * 2.0f);
 		d3dManager->getDevice().SetTransform(D3DTS_WORLD, &wM);
 		for (int i = 0; i < 6; i++)
 			d3dManager->getDevice().DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, 8, i * 4, 2);
@@ -43,6 +43,6 @@ void Cube::render(D3DManager *d3dManager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, 
 
 void Cube::update(const float dt)
 {
-	m_rotationX += DEG2RAD(1);
-	m_rotationY += DEG2RAD(2);
+	m_rotationX += DEG2RAD(0.2f);
+	m_rotationY += DEG2RAD(0.5f);
 }
