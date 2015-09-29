@@ -43,7 +43,6 @@ public:
 	void setProjectionMatrix() {
 		setProjectionMatrix(D3DX_PI / 4.0f, parameters.BackBufferWidth / (float)parameters.BackBufferHeight, 0.5f, 100.0f);
 	}
-	D3DXVECTOR3 getLookVector();
 
 	bool isFullScreen() { return !parameters.Windowed; }
 	void changeViewMode(int width, int height, bool fullscreen);
