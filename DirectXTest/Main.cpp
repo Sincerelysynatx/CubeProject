@@ -4,7 +4,6 @@
 #include "KeyCodes.h"
 #include "Cube.h"
 #include "Timer.h"
-#include "Camera.h"
 #include "Vector.h"
 #include <vector>
 #include <iostream>
@@ -160,6 +159,8 @@ void CameraMouseInput()
 {
 	const float kMaxAngle = 89.0f;
 	static float pitchAmt = 0.0f; // Amout we've looked up or down
+	static float sinAng = 0;
+	static float cosAng = 0;
 
 								  // Get the middle of the screen
 	int midScrX = GetSystemMetrics(SM_CXSCREEN) >> 1;
@@ -172,12 +173,25 @@ void CameraMouseInput()
 
 					   // Rotate left/right
 	amt = float(pt.x - midScrX) * moveAmt;
-	std::cout << "left/right:" << amt << std::endl;
+	//std::cout << amt << std::endl;
+	//std::cout << "left/right:" << amt << std::endl;
 	//gCamera->rotateY(DEG2RAD(amt), gCubePos);
+
+	sinAng += sinf(DEG2RAD(amt));
+	cosAng += cosf(DEG2RAD(amt));
+
+	D3DMATRIX yawMat;
+	
+	/*
+	viewVectors[0][0] = cosAng * moveAmt;
+	viewVectors[0][2] = -sinAng * moveAmt;
+	viewVectors[2][0] = sinAng * moveAmt;
+	viewVectors[2][2] = cosAng * moveAmt;
+	*/
 
 	// Rotate up/down
 	amt = float(midScrY - pt.y) * moveAmt;
-	std::cout << "up/down:" << amt << std::endl;
+	//std::cout << "up/down:" << amt << std::endl;
 
 	// Cap pitch
 	if (pitchAmt + amt < -kMaxAngle)
@@ -197,6 +211,7 @@ void CameraMouseInput()
 
 	// Pitch the camera up/down
 	//gCamera->pitch(DEG2RAD(amt), gCubePos);
+	d3dManager->setViewMatrix(viewVectors);
 
 	SetCursorPos(midScrX, midScrY); // Set our cursor back to the middle of the screen
 }
