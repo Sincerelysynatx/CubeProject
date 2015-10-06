@@ -27,7 +27,6 @@ D3DXVECTOR3 viewVectors[3] = {
 float deltaTime = 0;
 float moveAmt = 10.0f * (1.0f / 60.0f);
 
-
 void cleanup();
 void quitWithError(LPCTSTR error);
 void programLoop();
@@ -42,6 +41,33 @@ void initialize();
 void getSupportedVindowResolutions();
 
 LRESULT CALLBACK messageHandler(HWND window, UINT msg, WPARAM wParam, LPARAM lParam);
+
+struct resolution
+{
+	int m_width;
+	int m_height;
+	void setResolution(int width, int height)
+	{
+		m_width = width;
+		m_height = height;
+	}
+	bool isBigger(const resolution &res)
+	{
+		int total = m_width + m_height, tempTotal = res.m_width + res.m_height;
+		return total > tempTotal;
+	}
+	int getWidth()
+	{
+		return m_width;
+	}
+	int getHeight()
+	{
+		return m_height;
+	}
+};
+
+std::vector<resolution> resolutions;
+resolution findLargestRes(std::vector<resolution> &res);
 
 int main()
 {
@@ -88,7 +114,7 @@ void update()
 	//update timer
 	timer->update();
 	//get mouse input for the camera
-	//CameraMouseInput();
+	CameraMouseInput();
 	//d3dManager->setViewMatrix(gCamera);
 	deltaTime = timer->getDeltaTime();
 	for (auto cube : cubes)
@@ -146,10 +172,12 @@ void CameraMouseInput()
 
 					   // Rotate left/right
 	amt = float(pt.x - midScrX) * moveAmt;
+	std::cout << "left/right:" << amt << std::endl;
 	//gCamera->rotateY(DEG2RAD(amt), gCubePos);
 
 	// Rotate up/down
 	amt = float(midScrY - pt.y) * moveAmt;
+	std::cout << "up/down:" << amt << std::endl;
 
 	// Cap pitch
 	if (pitchAmt + amt < -kMaxAngle)
@@ -193,7 +221,8 @@ LRESULT CALLBACK messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 						}
 						else
 						{
-							d3dManager->goFullScreen(1920, 1080);
+							resolution maxRes = findLargestRes(resolutions);
+							d3dManager->goFullScreen(maxRes.getWidth(), maxRes.getHeight());
 						}
 					}
 					catch (LPCTSTR error)
@@ -376,7 +405,7 @@ void getSupportedVindowResolutions()
 	DEVMODE dm = { 0 };
 	dm.dmSize = sizeof(dm);
 	DWORD tempWidth = 0, tempHeight = 0;
-	
+
 	for (int iModeNum = 0; EnumDisplaySettings(NULL, iModeNum, &dm) != 0; iModeNum++) {
 		if (dm.dmPelsWidth == tempWidth && dm.dmPelsHeight == tempHeight)
 		{
@@ -385,9 +414,26 @@ void getSupportedVindowResolutions()
 		else
 		{
 			std::cout << "Mode #" << iModeNum << " = " << dm.dmPelsWidth << "x" << dm.dmPelsHeight << std::endl;
+			resolution res;
+			res.setResolution(tempWidth, tempHeight);
+			resolutions.push_back(res);
 			tempWidth = dm.dmPelsWidth; tempHeight = dm.dmPelsHeight;
 		}
 	}
+}
+
+resolution findLargestRes(std::vector<resolution> &res)
+{
+	resolution tempRes;
+	tempRes.setResolution(0, 0);
+	for (auto res : resolutions)
+	{
+		if (res.isBigger(tempRes))
+		{
+			tempRes = res;
+		}
+	}
+	return tempRes;
 }
 
 void quitWithError(LPCTSTR error)

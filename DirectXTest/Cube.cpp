@@ -43,6 +43,6 @@ void Cube::render(D3DManager *d3dManager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, 
 
 void Cube::update(const float dt)
 {
-	m_rotationX += DEG2RAD(0.2f);
-	m_rotationY += DEG2RAD(0.5f);
+	m_rotationX += DEG2RAD(0.2f * dt);
+	m_rotationY += DEG2RAD(0.5f * dt);
 }
