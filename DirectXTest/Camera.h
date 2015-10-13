@@ -6,21 +6,32 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib") // *NEW* - For much easier control over Matrices.
 
+const float cameraDistance = 2.5f;
+const D3DXVECTOR3 worldUp = { 0.0f, 1.0f, 0.0f };
+
 class Camera
 {
 public:
 	Camera();
-	Camera(float pitch, float yaw, D3DXVECTOR3 position);
-	~Camera();
-	void rotateYaw(float amt);
+	void rotateY(float angle, const D3DXVECTOR3 &target);
+	void setPitch(float angle, const D3DXVECTOR3 &target);
+	void setEye(const D3DXVECTOR3 &eyePos) { m_position = eyePos; }
+	void setTarget(const D3DXVECTOR3 &target);
+	void normalize(D3DXVECTOR3 &vec);
+	D3DXVECTOR3 getTarget() const { return m_position + (m_forward * cameraDistance); }
+	D3DXVECTOR3 getPos() const { return m_position; }
+	D3DXVECTOR3 getCamForward() const { return m_forward; }
+	D3DXVECTOR3 getCamUp() const { return m_up; }
+	D3DXVECTOR3 getCamRight() const { return m_right; }
+
 private:
-	float m_yaw;
-	float m_pitch;
-	float m_roll;
 	D3DXVECTOR3 m_position;
-	D3DXVECTOR3 xAxis;
-	D3DXVECTOR3 yAxis;
-	D3DXVECTOR3 zAxis;
+	D3DXVECTOR3 m_right;
+	D3DXVECTOR3 m_up;
+	D3DXVECTOR3 m_forward;
+
 };
+
+extern Camera *camera;
 
 #endif

@@ -112,6 +112,15 @@ void D3DManager::setViewMatrix(const D3DXVECTOR3& eye, const D3DXVECTOR3& lookAt
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 }
 
+void D3DManager::setViewMatrix(const Camera *camera)
+{
+	D3DXMATRIXA16 viewMatrix;
+	D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
+
+	D3DXMatrixLookAtLH(&viewMatrix, &camera->getPos(), &camera->getTarget(), &up);
+	device->SetTransform(D3DTS_VIEW, &viewMatrix);
+}
+
 // -------------------------------------------------
 /* setProjectionMatrix */
 // Sets the projection matrix.

@@ -14,7 +14,8 @@ public:
 	~Cube();
 	void render(D3DManager *d3dmanager, D3DXMATRIXA16 &bM, D3DXMATRIXA16 &wM, D3DXMATRIXA16 &rM1, D3DXMATRIXA16 &rM2, D3DXMATRIXA16 &tM);
 	void update(const float dt);
-
+	void move(const float dt, const float &x, const float &y, const float &z);
+	D3DXVECTOR3 position;
 private:
 	float m_length;
 	float m_height;

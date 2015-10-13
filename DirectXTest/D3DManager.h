@@ -6,6 +6,8 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib") // *NEW* - For much easier control over Matrices.
 
+#include "Camera.h"
+
 class D3DManager {
 
 	// The one is for when a device is about to be reset (and hence will become lost).
@@ -31,6 +33,7 @@ public:
 	{ 
 		setViewMatrix(vector[0], vector[1], vector[2]); 
 	}
+	void setViewMatrix(const Camera *camera);
 	void setProjectionMatrix(float fov, float aspectRatio, float zClose, float zFar);
 	void setProjectionMatrix(float fov, float zClose, float zFar) 
 	{

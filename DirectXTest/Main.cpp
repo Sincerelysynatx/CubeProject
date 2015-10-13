@@ -5,6 +5,7 @@
 #include "Cube.h"
 #include "Timer.h"
 #include "Vector.h"
+#include "Camera.h"
 #include <vector>
 #include <iostream>
 
@@ -17,12 +18,13 @@ IDirect3DVertexBuffer9* VBO = NULL;
 IDirect3DIndexBuffer9* IBO = NULL;
 Timer *timer;
 std::vector<Cube*> cubes;
-//CPos gCubePos(0, 0, 0); // Position of cube in the world
+Cube* player;
 D3DXVECTOR3 viewVectors[3] = {
-	D3DXVECTOR3(0.0f, 0.0f, -3.5f),
-	D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-	D3DXVECTOR3(0.0f, 1.0f, 0.0f)
+	D3DXVECTOR3(0.0f, 0.0f, cameraDistance), //position
+	D3DXVECTOR3(0.0f, 0.0f, 0.0f), //look at
+	D3DXVECTOR3(0.0f, 1.0f, 0.0f) //up
 };
+const float kMoveAmt = 10.0f * (1.0f / 60.0f);
 float deltaTime = 0;
 float moveAmt = 10.0f * (1.0f / 60.0f);
 
@@ -114,7 +116,7 @@ void update()
 	timer->update();
 	//get mouse input for the camera
 	CameraMouseInput();
-	//d3dManager->setViewMatrix(gCamera);
+	d3dManager->setViewMatrix(camera);
 	deltaTime = timer->getDeltaTime();
 	for (auto cube : cubes)
 	{
@@ -151,6 +153,7 @@ void render()
 	{
 		cube->render(d3dManager, baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix);
 	}
+	player->render(d3dManager, baseMatrix, worldMatrix, rotationMatrix1, rotationMatrix2, translateMatrix);
 	d3dManager->getDevice().SetTransform(D3DTS_WORLD, &baseMatrix);
 
 }
@@ -159,8 +162,6 @@ void CameraMouseInput()
 {
 	const float kMaxAngle = 89.0f;
 	static float pitchAmt = 0.0f; // Amout we've looked up or down
-	static float sinAng = 0;
-	static float cosAng = 0;
 
 								  // Get the middle of the screen
 	int midScrX = GetSystemMetrics(SM_CXSCREEN) >> 1;
@@ -172,26 +173,11 @@ void CameraMouseInput()
 	GetCursorPos(&pt); // Get the current mouse position
 
 					   // Rotate left/right
-	amt = float(pt.x - midScrX) * moveAmt;
-	//std::cout << amt << std::endl;
-	//std::cout << "left/right:" << amt << std::endl;
-	//gCamera->rotateY(DEG2RAD(amt), gCubePos);
-
-	sinAng += sinf(DEG2RAD(amt));
-	cosAng += cosf(DEG2RAD(amt));
-
-	D3DMATRIX yawMat;
-	
-	/*
-	viewVectors[0][0] = cosAng * moveAmt;
-	viewVectors[0][2] = -sinAng * moveAmt;
-	viewVectors[2][0] = sinAng * moveAmt;
-	viewVectors[2][2] = cosAng * moveAmt;
-	*/
+	amt = float(pt.x - midScrX) * kMoveAmt;
+	camera->rotateY(DEG2RAD(amt), player->position);
 
 	// Rotate up/down
-	amt = float(midScrY - pt.y) * moveAmt;
-	//std::cout << "up/down:" << amt << std::endl;
+	amt = float(midScrY - pt.y) * kMoveAmt;
 
 	// Cap pitch
 	if (pitchAmt + amt < -kMaxAngle)
@@ -208,10 +194,12 @@ void CameraMouseInput()
 	{
 		pitchAmt += amt;
 	}
+	//std::cout << camera->getPos().x << ", " << camera->getPos().y << ", " << camera->getPos().z << std::endl;
+
+	//std::cout << pitchAmt << std::endl;
 
 	// Pitch the camera up/down
-	//gCamera->pitch(DEG2RAD(amt), gCubePos);
-	d3dManager->setViewMatrix(viewVectors);
+	camera->setPitch(DEG2RAD(amt), player->position);
 
 	SetCursorPos(midScrX, midScrY); // Set our cursor back to the middle of the screen
 }
@@ -260,29 +248,21 @@ LRESULT CALLBACK messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 					return 0;
 
 				case 'W':
-				case VK_UP: // If they push up, move forward (Camera's +Z)
-					viewVectors[0][2] += 0.5f;
-					d3dManager->setViewMatrix(viewVectors);
+				case VK_UP:
 					return 0;
 
 				case 'S':
-				case VK_DOWN: // If they push down, move backward (Camera's -Z)
-					viewVectors[0][2] -= 0.5f;
-					d3dManager->setViewMatrix(viewVectors);
+				case VK_DOWN:
 					return 0;
 
 				case 'D':
-				case VK_RIGHT: // If they push right, move right (Camera's +X)
-					viewVectors[0][0] += 0.5f;
-					viewVectors[1][0] += 0.5f;
-					d3dManager->setViewMatrix(viewVectors);
+				case VK_RIGHT:
+
 					return 0;
 
 				case 'A':
-				case VK_LEFT: // If they push left, move left (Camera's -X)
-					viewVectors[0][0] -= 0.5f;
-					viewVectors[1][0] -= 0.5f;
-					d3dManager->setViewMatrix(viewVectors);
+				case VK_LEFT:
+
 					return 0;
 			}
 	}
@@ -384,6 +364,7 @@ void initialize()
 	initializeResources();
 	float pointSize = 0.0f;
 	timer = new Timer;
+	/*
 	for (int z = 0; z < 5; z++)
 	{
 		for (int y = 0; y < 5; y++)
@@ -394,6 +375,8 @@ void initialize()
 			}
 		}
 	}
+	*/
+	player = new Cube(0, 0, 0, true);
 	d3dManager->getDevice().SetRenderState(D3DRS_POINTSIZE, *((DWORD*)&pointSize));
 }
 
